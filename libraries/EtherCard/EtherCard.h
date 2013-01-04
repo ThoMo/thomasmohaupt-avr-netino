@@ -153,6 +153,9 @@ public:
   static uint8_t ntpProcessAnswer (uint32_t *time, uint8_t dstport_l);
   static void udpPrepare (uint16_t sport, uint8_t *dip, uint16_t dport);
   static void udpTransmit (uint16_t len);
+  // Send len data bytes from source port (sport) to host (dip) port (dport) as upd
+  // In the maximum 220 chars are transfered.
+  // Doing this by using udpPrepare + updTransmit
   static void sendUdp (char *data,uint8_t len,uint16_t sport,
                                               uint8_t *dip, uint16_t dport);
   static void registerPingCallback (void (*cb)(uint8_t*));
