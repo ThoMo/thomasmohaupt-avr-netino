@@ -626,6 +626,8 @@ word EtherCard::packetLoop (word plen) {
     }
     return 0;
   }
+
+  word data_start;
   if (gPB[TCP_DST_PORT_H_P] == (hisport >> 8) &&
       gPB[TCP_DST_PORT_L_P] == ((byte) hisport)) {
     if (gPB[TCP_FLAGS_P] & TCP_FLAGS_SYN_V)
@@ -633,9 +635,9 @@ word EtherCard::packetLoop (word plen) {
     else if (gPB[TCP_FLAGS_P] & TCP_FLAGS_ACK_V) {
       info_data_len = get_tcp_data_len();
       if (info_data_len > 0) {
-        len = TCP_DATA_START; // TCP_DATA_START is a formula
-        if (len <= plen - 8)
-          return len;
+        data_start = TCP_DATA_START; // TCP_DATA_START is a formula
+        if (data_start <= plen - 8)
+          return data_start;
       } else if (gPB[TCP_FLAGS_P] & TCP_FLAGS_FIN_V)
         make_tcp_ack_from_any(0,0);
     }
