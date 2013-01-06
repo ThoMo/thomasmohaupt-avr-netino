@@ -137,6 +137,9 @@ public:
   // tcpip.cpp
   static void initIp (uint8_t *myip,uint16_t wwwp);
   static void makeUdpReply (char *data,uint8_t len, uint16_t port);
+
+  // Process the packet. 
+  // Returns the buffer index of first data byte or 0 if no packet data received
   static uint16_t packetLoop (uint16_t plen);
   static void httpServerReply (uint16_t dlen);
   static void setGwIp (const uint8_t *gwipaddr);
