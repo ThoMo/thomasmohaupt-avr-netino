@@ -10,6 +10,7 @@
 // large pages.
 //
 // 2010-05-20 <jc@wippler.nl>
+// 2012-12-22 <thomas.mohaupt@gmail.com> add udp receive support
 
 #include "EtherCard.h"
 #include "net.h"
@@ -211,6 +212,11 @@ static void make_tcp_synack_from_syn() {
   gPB[TCP_WIN_SIZE+1] = 0x78;
   fill_checksum(TCP_CHECKSUM_H_P, IP_SRC_P, 8+TCP_HEADER_LEN_PLAIN+4,2);
   EtherCard::packetSend(IP_HEADER_LEN+TCP_HEADER_LEN_PLAIN+4+ETH_HEADER_LEN);
+}
+
+static word get_udp_data_len() {
+  int16_t i = gPB[UDP_LEN_L_P] - UDP_HEADER_LEN;
+  return i<=0 ? 0 : (word)i;
 }
 
 static word get_tcp_data_len() {
@@ -630,9 +636,14 @@ word EtherCard::packetLoop (word plen) {
   word data_start;
   if (gPB[TCP_DST_PORT_H_P] == (hisport >> 8) &&
       gPB[TCP_DST_PORT_L_P] == ((byte) hisport)) {
-    if (gPB[TCP_FLAGS_P] & TCP_FLAGS_SYN_V)
+    if (gPB[IP_PROTO_P] == IP_PROTO_UDP_V) {
+        info_data_len = get_udp_data_len();
+        if (info_data_len > 0) {
+          return UDP_DATA_P;
+        }
+    } else if (gPB[TCP_FLAGS_P] & TCP_FLAGS_SYN_V) {
       make_tcp_synack_from_syn();
-    else if (gPB[TCP_FLAGS_P] & TCP_FLAGS_ACK_V) {
+    } else if (gPB[TCP_FLAGS_P] & TCP_FLAGS_ACK_V) {
       info_data_len = get_tcp_data_len();
       if (info_data_len > 0) {
         data_start = TCP_DATA_START; // TCP_DATA_START is a formula
